@@ -1,26 +1,25 @@
-const mongo = require('mongodb').MongoClient
+const mongoose = require('mongoose')
 const express = require('express')
 const app = express()
 const port = process.env.port || 8888
 const server = app.listen(port)
 
-const mongoUrl = "mongodb://localhost:27017"
+const mongoUrl = "mongodb://localhost:27017/"
 
 const dbName = "caldb"
 
-mongo.connect(mongoUrl, (err, client) => {
-    if (err) throw err
+mongoose.Promise = global.Promise
 
-    console.log("Connected to mongo!")
-    getCurrentConfig(client.db(dbName), () => {})
-
-    app.get('/', (req, res) => {
-        console.log(getCurrentConfig(client.db(dbName)))        
-        res.send(getCurrentConfig(client.db(dbName)))
-        res.end()
+mongoose.connect(mongoUrl + dbName)
+    .then(() => {
+        console.log("Successfully connected to the database!")        
     })
-    
-})
+    .catch((err) => {
+        throw(err)
+    })
+
+
+require('./routes/settingsRoutes')(app)
 
 function getCurrentConfig(db) {
     const collection = db.collection('settings')
